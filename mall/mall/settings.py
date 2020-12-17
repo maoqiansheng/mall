@@ -191,3 +191,6 @@ REST_FRAMEWORK = {
     # 异常处理
     'EXCEPTION_HANDLER': 'utils.exceptions.exception_handler',
 }
+# 我们定义好用户模型类之后，我们需要当前系统采用我们定义的用户模型
+# 设置语法：子应用名.模型类
+AUTH_USER_MODEL = 'users.User'
