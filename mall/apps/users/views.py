@@ -31,4 +31,4 @@ class RegisterUsernameView(APIView):
         # 根据查询的结果判断用户是否存在
         count = User.objects.filter(username=username).count()
         # 3、返回响应
-        return Response({"count": count})
+        return Response({"count": count, "username": username})
