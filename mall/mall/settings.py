@@ -26,7 +26,16 @@ SECRET_KEY = '^6c689!m&k)n6*@cs6@pf+rct91hlw7lz%#-+fpr7)emac9pve'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# CORS
+CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
+    'http://www.meiduo.site:8080',
+    'http://api.meiduo.site:8000',
+)
+CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
+ALLOWED_HOSTS = ['api.meiduo.site', '127.0.0.1', 'localhost', 'www.meiduo.site']
+
 
 # 告诉系统我们的子应用的位置
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
@@ -41,9 +50,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 注册子应用的时候，可以直接到apps里去找，
     'users.apps.UsersConfig',
+    # 跨域访问支持
+    'corsheaders',
 ]
-
+# 中间层设置
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
