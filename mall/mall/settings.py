@@ -205,11 +205,24 @@ LOGGING = {
     }
 }
 
-# 异常处理配置
 REST_FRAMEWORK = {
-    # 异常处理
-    'EXCEPTION_HANDLER': 'utils.exceptions.exception_handler',
+        # 认证方式优先采用jwt,jwt放到最上面
+        'DEFAULT_AUTHENTICATION_CLASSES': (
+            'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+            'rest_framework.authentication.SessionAuthentication',
+            'rest_framework.authentication.BasicAuthentication',
+        ),
+        # 异常处理
+        'EXCEPTION_HANDLER': 'utils.exceptions.exception_handler',
 }
 # 我们定义好用户模型类之后，我们需要当前系统采用我们定义的用户模型
 # 设置语法：子应用名.模型类
 AUTH_USER_MODEL = 'users.User'
+import datetime
+
+# JWT
+# JWT_EXPIRATION_DELTA 指明token的有效期
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'utils.users.jwt_response_payload_handler',
+}
