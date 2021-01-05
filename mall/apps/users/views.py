@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
-# Create your views here.
 from users.models import User
+from s
+# Create your views here.
+from users.serializers import RegisterCreateUserSerializer
 
 """
 用户名接口逻辑分析：
@@ -32,3 +34,18 @@ class RegisterUsernameView(APIView):
         count = User.objects.filter(username=username).count()
         # 3、返回响应
         return Response({"count": count, "username": username})
+
+# 注册接口
+
+class RegisterCreateUserView(APIView):
+    def post(self, request):
+        # 接收参数
+        data = request.data
+        # 序列化校验
+        serializer = RegisterCreateUserSerializer(data=data)
+        # 序列化校验
+        serializer.is_valid(raise_exception=True)
+        # 保存到数据库
+        serializer.save()
+        return Response(serializer.data)
+
