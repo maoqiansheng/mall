@@ -37,7 +37,27 @@ class RegisterCreateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['mobile', 'password', 'username', 'password2', 'sms_code', 'allow', 'token']
+        fields = ['id', 'mobile', 'password', 'username', 'password2', 'sms_code', 'allow', 'token']
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'username': {
+                'min_length': 5,
+                'max_length': 20,
+                'error_messages': {
+                    'min_length': '仅允许5-20个字符的用户名',
+                    'max_length': '仅允许5-20个字符的用户名',
+                }
+            },
+            'password': {
+                'write_only': True,
+                'min_length': 8,
+                'max_length': 20,
+                'error_messages': {
+                    'min_length': '仅允许8-20个字符的密码',
+                    'max_length': '仅允许8-20个字符的密码',
+                }
+            }
+        }
 
     def validate_mobile(self, value):
         if not re.match('1[3-9]\d{9}', value):
