@@ -9,9 +9,10 @@ class RegisterCreateUserSerializer(serializers.ModelSerializer):
     """
     需要校验6个参数， mobile, username, password, password2, sms_code, allow（是否同意协议）
     """
-    password2 = serializers.CharField(label='确认密码')
-    sms_code = serializers.CharField(label='短信验证码', max_length=6, min_length=6, required=True)
-    allow = serializers.CharField(label='是否同意协议', required=True)
+    # write_only 只在反序列化输入的时候起作用
+    password2 = serializers.CharField(label='确认密码', write_only=True)
+    sms_code = serializers.CharField(label='短信验证码', max_length=6, min_length=6, write_only=True)
+    allow = serializers.CharField(label='是否同意协议', write_only=True)
 
     # ModelSerializer自动生成字段的时候是根据fileds来生成
     def create(self, validated_data):
@@ -22,12 +23,15 @@ class RegisterCreateUserSerializer(serializers.ModelSerializer):
         del validated_data['allow']
 
         user = super().create(validated_data)
+        # 修改密码
+        user.set_password(validated_data['password'])
+        user.save()
 
         return user
 
     class Meta:
         model = User
-        fields = ['mobile', 'password', 'username']
+        fields = ['mobile', 'password', 'username', 'password2', 'sms_code', 'allow']
 
     def validate_mobile(self, value):
         if not re.match('1[3-9]\d{9}', value):
@@ -35,7 +39,7 @@ class RegisterCreateUserSerializer(serializers.ModelSerializer):
         return value
 
     def validate_allow(self, value):
-        if value != True:
+        if value != 'true':
             raise serializers.ValidationError('你没有同意协议')
         return value
 
