@@ -34,7 +34,7 @@ CORS_ORIGIN_WHITELIST = (
     'http://api.meiduo.site:8000',
 )
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
-ALLOWED_HOSTS = ['api.meiduo.site', '127.0.0.1', 'localhost', 'www.meiduo.site']
+ALLOWED_HOSTS = ['*']
 
 
 # 告诉系统我们的子应用的位置
@@ -226,3 +226,7 @@ JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'utils.users.jwt_response_payload_handler',
 }
+
+AUTHENTICATION_BACKENDS = [
+   'utils.users.UsernameMoblieModelBackend',
+]
