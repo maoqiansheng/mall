@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User
-from s
+
 # Create your views here.
 from users.serializers import RegisterCreateUserSerializer
 
@@ -20,6 +20,8 @@ from users.serializers import RegisterCreateUserSerializer
 url（遵循restful风格）：/users/usernames/(?P<username>\w{5,20})/count/
     
 """
+
+
 # 需要分析用哪一个视图
 # APIView
 # Generic APIView
@@ -35,6 +37,7 @@ class RegisterUsernameView(APIView):
         # 3、返回响应
         return Response({"count": count, "username": username})
 
+
 # 注册接口
 
 class RegisterCreateUserView(APIView):
@@ -47,5 +50,5 @@ class RegisterCreateUserView(APIView):
         serializer.is_valid(raise_exception=True)
         # 保存到数据库
         serializer.save()
-        return Response(serializer.data)
 
+        return Response(serializer.data)

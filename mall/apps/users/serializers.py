@@ -14,6 +14,16 @@ class RegisterCreateUserSerializer(serializers.ModelSerializer):
     allow = serializers.CharField(label='是否同意协议', required=True)
 
     # ModelSerializer自动生成字段的时候是根据fileds来生成
+    def create(self, validated_data):
+
+        # 删除多余字段
+        del validated_data['password2']
+        del validated_data['sms_code']
+        del validated_data['allow']
+
+        user = super().create(validated_data)
+
+        return user
 
     class Meta:
         model = User
