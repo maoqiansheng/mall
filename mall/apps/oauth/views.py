@@ -4,8 +4,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from QQLoginTool.QQtool import OAuthQQ
 # Create your views here.
-from mall import settings
+from rest_framework_jwt.settings import api_settings
 
+from mall import settings
+from .models import OAuthQQUser
+from .utils import generate_save_token
+from .serializers import OauthQQUserSerializer
 """
 用户点击QQ登陆的时候，前端发送一个ajax请求，后端把生成的url返回给前端
 
@@ -54,10 +58,48 @@ class OauthQQUserView(APIView):
         try:
             # 使用code向QQ服务器请求access_token
             access_token = oauth.get_access_token(code)
-            print(access_token)
-
             # 使用access_token向QQ服务器请求openid
             openid = oauth.get_open_id(access_token)
-            print(openid)
         except Exception:
             return Response({'message': 'QQ服务异常'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        # 获取到openid之后，我们需要查询下数据库，如果数据哭中有openid,s说明绑定过了
+            # 使用openid查询该QQ用户是否在美多商城中绑定过用户
+        try:
+            oauth_user = OAuthQQUser.objects.get(openid=openid)
+        except OAuthQQUser.DoesNotExist:
+            # 如果openid没绑定美多商城用户，创建用户并绑定到openid
+            # 为了能够在后续的绑定用户操作中前端可以使用openid，在这里将openid签名后响应给前端
+            access_token_openid = generate_save_token(openid)
+            return Response({'access_token': access_token_openid})
+        else:
+            # 如果openid已绑定美多商城用户，直接生成JWT token，并返回
+            jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+            jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+            # 获取oauth_user关联的user
+            user = oauth_user.user
+            payload = jwt_payload_handler(user)
+            token = jwt_encode_handler(payload)
+
+            response = Response({
+                'token': token,
+                'user_id': user.id,
+                'username': user.username
+            })
+
+            return response
+
+    def post(self, request):
+        """
+        QQ绑定用户
+        """
+        # 接收数据
+        data = request.data
+        # 参数校验，放到序列化器中校验
+        serializer = OauthQQUserSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return serializer.data
+
+
+
