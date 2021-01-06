@@ -93,13 +93,28 @@ class OauthQQUserView(APIView):
         """
         QQ绑定用户
         """
-        # 接收数据
-        data = request.data
-        # 参数校验，放到序列化器中校验
-        serializer = OauthQQUserSerializer(data=data)
+        """openid绑定到用户"""
+
+        # 获取序列化器对象
+        serializer = OauthQQUserSerializer(data=request.data)
+        # 开启校验
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return serializer.data
+        # 保存校验结果，并接收
+        user = serializer.save()
+
+        # 生成JWT token，并响应
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+
+        response = Response({
+            'token': token,
+            'user_id': user.id,
+            'username': user.username
+        })
+
+        return response
 
 
 
