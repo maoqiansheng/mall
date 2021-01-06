@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     # 跨域访问支持
     'corsheaders',
+    'oauth.apps.OauthConfig',
+    'rest_framework'
 ]
 # 中间层设置
 MIDDLEWARE = [
@@ -230,3 +232,7 @@ JWT_AUTH = {
 AUTHENTICATION_BACKENDS = [
    'utils.users.UsernameMoblieModelBackend',
 ]
+# QQ登录参数
+QQ_CLIENT_ID = '101474184'
+QQ_CLIENT_SECRET = 'c6ce949e04e12ecc909ae6a8b09b637c'
+QQ_REDIRECT_URI = 'http://www.meiduo.site:8080/oauth_callback.html'
