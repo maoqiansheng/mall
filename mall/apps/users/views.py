@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User
@@ -7,6 +8,8 @@ from users.models import User
 from users.serializers import RegisterCreateUserSerializer, EmailSerializer
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserCenterInfoSerializer
+from .utils import generate_verify_url, check_active_token
+
 """
 用户名接口逻辑分析：
 前端：
@@ -78,11 +81,45 @@ class EmailView(APIView):
     def put(self, request):
         data = request.data
         user = request.user
-        serializer = EmailSerializer(data=data)
+        email = data.get('email')
+        serializer = EmailSerializer(instance=user, data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        # 发送邮件163授权码#RJUNSTDKWDMYWRLB
+        # from django.core.mail import send_mail
+        # subject = '美多商城邮箱验证'
+        # message = ''
+        # from_mail = '美多商城<18137803201@163.com>'
+        # verify_url = generate_verify_url(user.id, email)
+        # html_massage = '<p>尊敬的用户您好！</p>' \
+        #                '<p>感谢您使用美多商城。</p>' \
+        #                '<p>您的邮箱为：%s 。请点击此链接激活您的邮箱：</p>' \
+        #                '<p><a href="%s">%s<a></p>' % (email, verify_url, verify_url)
+        # send_mail(subject=subject,
+        #           message=message,
+        #           from_email=from_mail,
+        #           recipient_list=[email],
+        #           html_message=html_massage)
+
+        # 使用celery_tasks异步发送邮件
+        from celery_tasks.email.tasks import send_verify_email
+        send_verify_email(user.id, email)
         return Response(serializer.data)
 
+
+class UserEmailActiveView(APIView):
+    """
+    用户点击邮箱链接，激活邮箱，数据库tb_users中的email_active为1
+    """
+    def get(self, request):
+        token = request.query_params.get('token')
+        if not token:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user_id = check_active_token(token)
+        user = User.objects.get(id=user_id)
+        user.email_active = True
+        user.save()
+        return Response({"msg": "ok"})
 
 
 

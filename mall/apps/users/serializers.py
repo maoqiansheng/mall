@@ -104,16 +104,4 @@ class EmailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email',)
-        extra_kwargs = {
-            'email':{
-                'required':True
-            }
-        }
-
-    def update(self, instance, validated_data):
-
-        email = validated_data['email']
-        instance.email = validated_data['email']
-        instance.save()
-        return instance
+        fields = ('email',)
