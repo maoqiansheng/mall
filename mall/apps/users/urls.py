@@ -6,5 +6,7 @@ urlpatterns = [
     url(r'^usernames/(?P<username>\w{5,20})/count/$', views.RegisterUsernameView.as_view(), name='username'),
     url(r'^$', views.RegisterCreateUserView.as_view(), name='user'),
     url(r'auths/', obtain_jwt_token, name='auths'),
+    url(r'^infos/$', views.UserCenterView.as_view()),
+    url(r'^emails/$', views.EmailView.as_view()),
 
 ]

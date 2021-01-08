@@ -5,6 +5,7 @@ from .models import User
 from django_redis import get_redis_connection
 from rest_framework_jwt.settings import api_settings
 
+
 class RegisterCreateUserSerializer(serializers.ModelSerializer):
     """
     需要校验6个参数， mobile, username, password, password2, sms_code, allow（是否同意协议）
@@ -15,6 +16,7 @@ class RegisterCreateUserSerializer(serializers.ModelSerializer):
     allow = serializers.CharField(label='是否同意协议', write_only=True)
     token = serializers.CharField(label='登录状态token', read_only=True)  # 增加token字段
     # ModelSerializer自动生成字段的时候是根据fileds来生成
+
     def create(self, validated_data):
 
         # 删除多余字段
@@ -83,3 +85,35 @@ class RegisterCreateUserSerializer(serializers.ModelSerializer):
         if redis_text.decode() != sms_code:
             raise serializers.ValidationError('图片验证码不一致')
         return attrs
+
+
+class UserCenterInfoSerializer(serializers.ModelSerializer):
+    """
+        用户详细信息序列化器
+        """
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'mobile', 'email', 'email_active')
+
+
+class EmailSerializer(serializers.ModelSerializer):
+    """
+    邮箱序列化器
+    """
+
+    class Meta:
+        model = User
+        fields = ('id', 'email',)
+        extra_kwargs = {
+            'email':{
+                'required':True
+            }
+        }
+
+    def update(self, instance, validated_data):
+
+        email = validated_data['email']
+        instance.email = validated_data['email']
+        instance.save()
+        return instance

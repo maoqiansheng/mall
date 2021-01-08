@@ -4,8 +4,9 @@ from rest_framework.views import APIView
 from users.models import User
 
 # Create your views here.
-from users.serializers import RegisterCreateUserSerializer
-
+from users.serializers import RegisterCreateUserSerializer, EmailSerializer
+from rest_framework.permissions import IsAuthenticated
+from .serializers import UserCenterInfoSerializer
 """
 用户名接口逻辑分析：
 前端：
@@ -52,3 +53,36 @@ class RegisterCreateUserView(APIView):
         serializer.save()
 
         return Response(serializer.data)
+
+
+# 个人中心接口，只能登陆用户访问，前端通过在header中添加token
+class UserCenterView(APIView):
+    # 只能登陆用户访问
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # 根据token获取用户对象
+        user = request.user
+        # 创建序列化器
+        serializer = UserCenterInfoSerializer(user)
+        return Response(serializer.data)
+
+
+class EmailView(APIView):
+    """
+    保存邮箱
+    PUT /users/emails/
+    """
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        data = request.data
+        user = request.user
+        serializer = EmailSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+
+

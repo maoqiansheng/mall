@@ -10,7 +10,7 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     # 在继承AbstractUser的基础上额外扩展一些属性mobile
     mobile = models.CharField(max_length=11, unique=True, verbose_name='手机号')
-
+    email_active = models.BooleanField(default=False, verbose_name='邮箱验证状态')
     class Meta:
         db_table = 'tb_users'
         verbose_name = '用户'
